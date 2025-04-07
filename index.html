@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Life Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-bg: #000;           /* Black background */
+      --secondary-bg: #121212;      /* Slightly lighter for inputs */
+      --card-bg: #1f1f1f;           /* Card background */
+      --accent-color: #9b59b6;      /* Purple accent */
+      --accent-hover: #8e44ad;      /* Darker purple on hover */
+      --text-color: #fff;
+      --border-color: #333;
+    }
+    
+    body {
+      background-color: var(--primary-bg);
+      color: var(--text-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Card styling */
+    .card {
+      background-color: var(--card-bg);
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Button styling */
+    .btn-primary, 
+    .btn-success, 
+    .btn-outline-light, 
+    .btn-outline-success {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+      color: var(--text-color);
+    }
+    
+    .btn-primary:hover, 
+    .btn-success:hover, 
+    .btn-outline-light:hover, 
+    .btn-outline-success:hover {
+      background-color: var(--accent-hover);
+      border-color: var(--accent-hover);
+      color: var(--text-color);
+    }
+    
+    .btn-outline-light {
+      background-color: transparent;
+      border: 1px solid var(--accent-color);
+    }
+    
+    .btn-outline-light:hover {
+      background-color: var(--accent-color);
+    }
+    
+    /* Input styling */
+    .form-control {
+      background-color: var(--secondary-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+    
+    .form-control:focus {
+      box-shadow: none;
+      border-color: var(--accent-color);
+    }
+    
+    /* Progress bar styling */
+    .progress {
+      background-color: var(--secondary-bg);
+      border-radius: 10px;
+    }
+    
+    .progress-bar {
+      background-image: linear-gradient(45deg, var(--accent-color), var(--accent-hover));
+    }
+    
+    /* Headings and labels */
+    h1, h2, h5 {
+      font-weight: 600;
+    }
+    
+    /* Spacing for screens */
+    #login-screen, #dashboard {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+    
+    a.btn {
+      transition: background-color 0.3s;
+    }
+    
+    a.btn:hover {
+      background-color: var(--accent-color);
+      color: var(--text-color);
+    }
+  </style>
+</head>
+<body class="bg-dark text-white">
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="container text-center py-5">
+    <h2 class="mb-4">🔐 Login</h2>
+    <input type="email" id="email-input" class="form-control mb-2 w-50 mx-auto" placeholder="Email" />
+    <input type="password" id="password-input" class="form-control mb-3 w-50 mx-auto" placeholder="Password" />
+    <button onclick="login()" class="btn btn-primary">Login</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="container-fluid px-4 py-5" style="display: none;">
+    <div class="text-end mb-4">
+      <button class="btn btn-outline-light btn-sm" onclick="logout()">Log Out</button>
+    </div>
+    <h1 class="mb-4 text-center">📊 Life Dashboard</h1>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+
+      <!-- XP Tracker -->
+      <div class="col">
+        <div class="card shadow-sm text-light border-0 rounded-4 h-100">
+          <div class="card-body text-center">
+            <h5 class="card-title">🧬 XP Tracker</h5>
+            <p class="mb-2">Daily XP: <span id="xp_total">--</span></p>
+            <div class="mb-2">Level <span id="current_level">--</span></div>
+            <div class="progress mb-2" style="height: 20px;">
+              <div id="xp_progress" class="progress-bar" role="progressbar"
+                   style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+            <p class="small text-muted">XP to Next Level: <span id="xp_to_next_level">--</span></p>
+            <div class="d-flex flex-column align-items-center mt-3">
+              <label for="xp_task_select" class="form-label">Quick Complete Task</label>
+              <select id="xp_task_select" class="form-select w-75 mb-2">
+                <option value="">Choose a task...</option>
+              </select>
+              <button class="btn btn-success btn-sm" onclick="quickCompleteXP()">✅ Complete Task</button>
+              <a href="pages/xp.html" class="btn btn-outline-light btn-sm mt-3">Manage XP Tasks</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Physical Health -->
+      <div class="col">
+        <div class="card shadow-sm text-light border-0 rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title">🏋️ Physical Health</h5>
+            <p>Weight: <span id="weight"></span> kg</p>
+            <p>Energy Level: <span id="energy"></span>/10</p>
+            <a href="pages/physical.html" class="btn btn-outline-light btn-sm mt-2">Update</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diet -->
+      <div class="col">
+        <div class="card shadow-sm text-light border-0 rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title">🍽️ Diet</h5>
+            <p>Healthy Meals: <span id="healthy_meals"></span></p>
+            <p>Processed Food Level: <span id="processed"></span>/10</p>
+            <a href="pages/diet.html" class="btn btn-outline-light btn-sm mt-2">Update</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Productivity -->
+      <div class="col">
+        <div class="card shadow-sm text-light border-0 rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title">💻 Productivity</h5>
+            <p>Focus Hours: <span id="focus"></span></p>
+            <p>Tasks Done: <span id="tasks"></span></p>
+            <a href="pages/productivity.html" class="btn btn-outline-light btn-sm mt-2">Update</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mood -->
+      <div class="col">
+        <div class="card shadow-sm text-light border-0 rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title">😊 Mood</h5>
+            <p>Mood: <span id="mood"></span>/10</p>
+            <p>Stress: <span id="stress"></span>/10</p>
+            <a href="pages/mood.html" class="btn btn-outline-light btn-sm mt-2">Update</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sleep -->
+      <div class="col">
+        <div class="card shadow-sm text-light border-0 rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title">💤 Sleep</h5>
+            <p>Sleep Hours: <span id="sleep_hours"></span></p>
+            <p>Sleep Quality: <span id="sleep_quality"></span>/10</p>
+            <a href="pages/sleep.html" class="btn btn-outline-light btn-sm mt-2">Update</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Finances -->
+      <div class="col">
+        <div class="card shadow-sm text-light border-0 rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title">💸 Finances</h5>
+            <p>Debt: £<span id="debt"></span></p>
+            <p>Savings: £<span id="savings"></span></p>
+            <a href="pages/finances.html" class="btn btn-outline-light btn-sm mt-2">Update</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Self Improvement -->
+      <div class="col">
+        <div class="card shadow-sm text-light border-0 rounded-4 h-100">
+          <div class="card-body">
+            <h5 class="card-title">🧠 Self-Improvement</h5>
+            <p>Learning Hours: <span id="learning"></span></p>
+            <p>Confidence: <span id="confidence"></span>/10</p>
+            <a href="pages/selfimprovement.html" class="btn btn-outline-light btn-sm mt-2">Update</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="scripts/main.js"></script>
+</body>
+</html>

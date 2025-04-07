@@ -1,0 +1,26 @@
+body {
+    background-color: #121212;
+  }
+  
+  .card {
+    background-color: #1f1f1f;
+    color: #ffffff;
+    border: none;
+    border-radius: 1rem;
+  }
+  
+  .card-title {
+    font-weight: bold;
+  }
+  
+  input.form-control {
+    background-color: #1f1f1f;
+    color: white;
+    border: 1px solid #444;
+  }
+  
+  input.form-control:focus {
+    background-color: #2a2a2a;
+    color: white;
+  }
+  

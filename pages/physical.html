@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physical Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Overall page style */
+    body {
+      background-color: #121212;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    /* Modern card styling */
+    .card {
+      background-color: #1e1e1e;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    /* Input styling */
+    .form-control {
+      background-color: #2c2c2c;
+      border: 1px solid #444;
+      color: #fff;
+    }
+    .form-control:focus {
+      box-shadow: none;
+      border-color: #777;
+    }
+    /* Button styling */
+    .btn {
+      border-radius: 8px;
+    }
+    /* Header and label adjustments */
+    h1 {
+      font-weight: 600;
+    }
+    label {
+      font-weight: 500;
+    }
+    /* Input group tweaks */
+    .input-group > .form-control {
+      border-right: 0;
+    }
+    .input-group > .btn {
+      border-left: 0;
+    }
+  </style>
+</head>
+<body class="bg-dark text-white">
+  <div class="container py-5">
+    <h1 class="mb-4 text-center">💪 Physical Health</h1>
+    <!-- Date Selector -->
+    <div class="mb-4 text-center">
+      <label for="entry-date" class="form-label">Select Date</label>
+      <input type="date" id="entry-date" class="form-control w-auto mx-auto" />
+    </div>
+    <!-- Vitals -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">📈 Vitals</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Weight (kg)</label>
+            <input type="number" id="weight_kg" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Body Fat (%)</label>
+            <input type="number" id="body_fat_percentage" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Resting HR</label>
+            <input type="number" id="resting_heart_rate" class="form-control">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Recovery -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">🔄 Recovery</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Energy (1–10)</label>
+            <input type="number" id="daily_energy_level" min="1" max="10" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Soreness (1–10)</label>
+            <input type="number" id="soreness_level" min="1" max="10" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Hydration (1–10)</label>
+            <input type="number" id="hydration_level" min="1" max="10" class="form-control">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Workout Routine Manager -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">📋 Workout Routine Manager</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="routine_select" class="form-label">Choose Routine</label>
+            <div class="input-group">
+              <select id="routine_select" class="form-select rounded-start">
+                <option value="">Select...</option>
+              </select>
+              <button class="btn btn-outline-primary" id="load-routine">Load</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="routine_name" class="form-label">Save Current as New Routine</label>
+            <div class="input-group">
+              <input type="text" id="routine_name" class="form-control" placeholder="e.g., Push Day A">
+              <button class="btn btn-success" id="save-routine">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Workouts -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">🏋️ Workouts</h5>
+        <div id="workout-list" class="mb-3">
+          <div class="row g-2 border-bottom pb-2 text-muted small">
+            <div class="col"><strong>Exercise</strong></div>
+            <div class="col"><strong>Sets</strong></div>
+            <div class="col"><strong>Reps</strong></div>
+            <div class="col"><strong>Weight (kg)</strong></div>
+            <div class="col"><strong>Action</strong></div>
+          </div>
+        </div>
+        <button id="add-workout" class="btn btn-outline-info btn-sm w-100">➕ Add Exercise</button>
+      </div>
+    </div>
+    <button id="save-btn" class="btn btn-primary w-100 py-2 mb-3">💾 Save Physical Entry</button>
+    <a href="../index.html" class="btn btn-link text-light d-block text-center">← Back to Dashboard</a>
+  </div>
+
+  <script type="module">
+    // Existing JavaScript code remains unchanged...
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAmE_yVCfiM0P6HnS7K70aeFpk9hFi--lI",
+      authDomain: "sololevelling-b9c67.firebaseapp.com",
+      databaseURL: "https://sololevelling-b9c67-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "sololevelling-b9c67",
+      storageBucket: "sololevelling-b9c67.appspot.com",
+      messagingSenderId: "745212757936",
+      appId: "1:745212757936:web:7975461a65b8bec07ab875"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    let currentUID = null;
+
+    const entryDate = document.getElementById("entry-date");
+    const today = new Date().toISOString().split("T")[0];
+    entryDate.value = today;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return (window.location.href = "../index.html");
+      currentUID = user.uid;
+      // Populate routine options
+      const routineSelect = document.getElementById("routine_select");
+      const refRoutines = ref(db, `users/${user.uid}/routines`);
+      get(refRoutines).then((snap) => {
+        if (snap.exists()) {
+          const routines = snap.val();
+          for (const id in routines) {
+            const opt = document.createElement("option");
+            opt.value = id;
+            opt.textContent = id;
+            routineSelect.appendChild(opt);
+          }
+        }
+      });
+      loadData(entryDate.value);
+    });
+
+    entryDate.addEventListener("change", () => loadData(entryDate.value));
+
+    function loadData(date) {
+      const refPath = `users/${currentUID}/entries/${date}/physical`;
+      get(ref(db, refPath)).then((snap) => {
+        if (!snap.exists()) return;
+        const data = snap.val();
+        ["weight_kg", "body_fat_percentage", "resting_heart_rate", "daily_energy_level", "soreness_level", "hydration_level"].forEach(id => {
+          document.getElementById(id).value = data[id] || "";
+        });
+        if (data.workouts) {
+          document.getElementById("workout-list").innerHTML = "";
+          data.workouts.forEach(addWorkoutRow);
+        }
+      });
+    }
+
+    function addWorkoutRow(workout = {}) {
+      const row = document.createElement("div");
+      row.className = "row row-cols-1 row-cols-md-5 g-2 mb-2 align-items-end";
+      row.innerHTML = `
+        <div class="col"><input class="form-control" placeholder="Exercise" value="${workout.name || ""}" /></div>
+        <div class="col"><input class="form-control" placeholder="Sets" type="number" value="${workout.sets || ""}" /></div>
+        <div class="col"><input class="form-control" placeholder="Reps" type="number" value="${workout.reps || ""}" /></div>
+        <div class="col"><input class="form-control" placeholder="Weight (kg)" type="number" value="${workout.weight || ""}" /></div>
+        <div class="col"><button class="btn btn-outline-danger btn-sm w-100" onclick="this.closest('.row').remove()">Remove</button></div>
+      `;
+      document.getElementById("workout-list").appendChild(row);
+    }
+
+    document.getElementById("add-workout").addEventListener("click", () => addWorkoutRow());
+
+    document.getElementById("load-routine").addEventListener("click", async () => {
+      const selected = document.getElementById("routine_select").value;
+      if (!selected) return alert("Select a routine first");
+      const snap = await get(ref(db, `users/${currentUID}/routines/${selected}`));
+      if (!snap.exists()) return alert("Routine not found");
+      const exercises = snap.val();
+      document.getElementById("workout-list").innerHTML = "";
+      exercises.forEach(addWorkoutRow);
+    });
+
+    document.getElementById("save-routine").addEventListener("click", async () => {
+      const name = document.getElementById("routine_name").value.trim();
+      if (!name) return alert("Enter a name for your routine");
+      const workouts = Array.from(document.querySelectorAll("#workout-list .row")).map(row => {
+        const inputs = row.querySelectorAll("input");
+        return {
+          name: inputs[0].value,
+          sets: parseInt(inputs[1].value) || 0,
+          reps: parseInt(inputs[2].value) || 0,
+          weight: parseFloat(inputs[3].value) || 0
+        };
+      });
+      await set(ref(db, `users/${currentUID}/routines/${name}`), workouts);
+      alert("✅ Routine saved!");
+    });
+
+    document.getElementById("save-btn").addEventListener("click", async () => {
+      const date = entryDate.value;
+      const path = `users/${currentUID}/entries/${date}/physical`;
+      const workouts = Array.from(document.querySelectorAll("#workout-list .row")).map(row => {
+        const inputs = row.querySelectorAll("input");
+        return {
+          name: inputs[0].value,
+          sets: parseInt(inputs[1].value) || 0,
+          reps: parseInt(inputs[2].value) || 0,
+          weight: parseFloat(inputs[3].value) || 0
+        };
+      });
+
+      const data = {
+        weight_kg: parseFloat(document.getElementById("weight_kg").value),
+        body_fat_percentage: parseFloat(document.getElementById("body_fat_percentage").value),
+        resting_heart_rate: parseInt(document.getElementById("resting_heart_rate").value),
+        daily_energy_level: parseInt(document.getElementById("daily_energy_level").value),
+        soreness_level: parseInt(document.getElementById("soreness_level").value),
+        hydration_level: parseInt(document.getElementById("hydration_level").value),
+        workouts
+      };
+      await set(ref(db, path), data);
+      alert("✅ Physical data saved!");
+    });
+  </script>
+</body>
+</html>
